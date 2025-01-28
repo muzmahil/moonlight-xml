@@ -13,7 +13,13 @@ namespace XML_Translator
         private FileOperations fileOperations = new FileOperations(); // Handles file operations
         private UpdateOperations updateOperations = new UpdateOperations(); // Handles update operations
         private Dictionary<string, string> rightListBoxData = new Dictionary<string, string>(); // Stores modified XML data
+        private Dictionary<string, string> sourceListBoxData = new Dictionary<string, string>(); // Stores modified XML data
 
+        public bool autoEncode = true;
+        public bool autoSave = false;
+        public bool autoSaveFile = false;
+        private bool isFileLoaded = false;
+        public string saveFilePath = null;
         private const string CurrentVersion = "1.0.2"; // Current version of the application
 
         public main()
@@ -32,8 +38,9 @@ namespace XML_Translator
 
             if (openFileDialog.ShowDialog() == DialogResult.OK) // If the user selects a file
             {
+                sourceListBoxData.Clear();
                 fileOperations.CurrentFilePath = openFileDialog.FileName; // Store the selected file path
-
+                isFileLoaded = true;
                 // Detect the encoding of the XML file
                 string encodingName = fileOperations.GetXmlEncoding(fileOperations.CurrentFilePath);
                 sourceEncoding.SelectedItem = encodingName.ToLower(); // Set the source encoding dropdown
@@ -63,7 +70,7 @@ namespace XML_Translator
                 destItemCountText.Text = "0 / 0";
 
                 // Load the XML file into the list boxes
-                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, selectedEncoding, sourceList, sourceItemCountText);
+                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, selectedEncoding, sourceList, sourceItemCountText,sourceListBoxData);
                 sourceList.SelectedIndex = 0; // Select the first item in the source list
             }
         }
@@ -162,26 +169,29 @@ namespace XML_Translator
         // Event handler for the "Add to Destination" button click
         private void button2_Click(object sender, EventArgs e)
         {
+            
             if (sourceList.SelectedItem != null && !destList.Items.Contains(sourceList.SelectedItem)) // If an item is selected and not already in the destination list
             {
                 string selectedItem = sourceList.SelectedItem.ToString(); // Get the selected item
-                string xmlValue = fileOperations.XmlData[selectedItem]; // Get the corresponding value from the XML data
+                string xmlValue = sourceListBoxData[selectedItem]; // Get the corresponding value from the XML data
 
                 if (!rightListBoxData.ContainsKey(selectedItem)) // If the item is not already in the destination data
                 {
                     rightListBoxData[selectedItem] = xmlValue; // Add the item to the destination data
                     destList.Items.Add(selectedItem); // Add the item to the destination list
-                    destValueControl(); // Update the destination list controls
+                    // Update the destination list controls
 
                     // Move to the next item in the source list
-                    if (!((sourceList.SelectedIndex + 1) + 1 > sourceList.Items.Count))
-                    {
-                        sourceList.SelectedIndex++;
-                    }
+                   
 
                     // Update the destination item count text
                     destItemCountText.Text = (destList.SelectedIndex + 1).ToString() + " / " + destList.Items.Count.ToString();
+                    destValueControl();
                 }
+            }
+            if (!((sourceList.SelectedIndex + 1) + 1 > sourceList.Items.Count))
+            {
+                sourceList.SelectedIndex++;
             }
         }
 
@@ -190,6 +200,8 @@ namespace XML_Translator
         {
             if (destList.Items.Count > 0) // If there are items in the destination list
             {
+                closeFileBtn.Enabled = true;
+                closeFileBtn.BackColor = Color.FromArgb(0, 120, 215);
                 removeFromDestBtn.Enabled = true; // Enable the remove button
                 removeFromDestBtn.BackColor = Color.FromArgb(0, 120, 215); // Set the button color
                 destSave.Enabled = true; // Enable the save button
@@ -199,6 +211,8 @@ namespace XML_Translator
             }
             else
             {
+                closeFileBtn.Enabled = false;
+                closeFileBtn.BackColor = Color.DarkGray;
                 removeFromDestBtn.Enabled = false; // Disable the remove button
                 removeFromDestBtn.BackColor = Color.DarkGray; // Set the button color to dark gray
                 destSave.Enabled = false; // Disable the save button
@@ -217,7 +231,14 @@ namespace XML_Translator
                 string selectedId = destList.SelectedItem.ToString(); // Get the selected item's ID
                 Encoding selectedEncoding = Encoding.GetEncoding(destEncoding.SelectedItem.ToString()); // Get the selected encoding
                 DisplayTextForSelectedIdInRightTextBox(selectedId, selectedEncoding); // Display the text for the selected ID in the right text box
-
+                if (autoSave == true)
+                {
+                    destSave.PerformClick();
+                }
+                if (autoSaveFileBox.Checked == true && isFileLoaded == true && destList.Items.Count > 0 && saveFilePath != null)
+                {
+                    fileOperations.SaveXmlFile(saveFilePath, selectedEncoding, rightListBoxData); // Save the XML file
+                }
                 if (sourceList.Items.Contains(selectedId)) // If the selected ID is in the source list
                 {
                     sourceList.SelectedItem = selectedId; // Select the item in the source list
@@ -283,22 +304,35 @@ namespace XML_Translator
         // Event handler for saving the XML file
         private void button4_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            if (saveFilePath != null)
             {
-                Filter = "XML Files|*.xml", // Set the filter for XML files
-                Title = "Save XML File" // Set the title of the save file dialog
-            };
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK) // If the user selects a file to save
-            {
-                string saveFilePath = saveFileDialog.FileName; // Get the selected file path
-
                 string selectedEncodingName = destEncoding.SelectedItem?.ToString() ?? sourceEncoding.SelectedItem.ToString(); // Get the selected encoding
                 Encoding selectedEncoding = Encoding.GetEncoding(selectedEncodingName); // Get the selected encoding object
 
                 fileOperations.SaveXmlFile(saveFilePath, selectedEncoding, rightListBoxData); // Save the XML file
                 MessageBox.Show("File saved successfully.", "Successful", MessageBoxButtons.OK, MessageBoxIcon.Information); // Show a success message
             }
+            else
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "XML Files|*.xml", // Set the filter for XML files
+                    Title = "Save XML File" // Set the title of the save file dialog
+                };
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK) // If the user selects a file to save
+                {
+                    saveFilePath = saveFileDialog.FileName; // Get the selected file path
+
+                    string selectedEncodingName = destEncoding.SelectedItem?.ToString() ?? sourceEncoding.SelectedItem.ToString(); // Get the selected encoding
+                    Encoding selectedEncoding = Encoding.GetEncoding(selectedEncodingName); // Get the selected encoding object
+
+                    fileOperations.SaveXmlFile(saveFilePath, selectedEncoding, rightListBoxData); // Save the XML file
+                    closeFileBtn.Enabled = true;
+                    MessageBox.Show("File saved successfully.", "Successful", MessageBoxButtons.OK, MessageBoxIcon.Information); // Show a success message
+                }
+            }
+            
         }
 
         // Event handler for removing an item from the destination list
@@ -345,15 +379,162 @@ namespace XML_Translator
         // Event handler for text changes in the destination text box
         private void destText_TextChanged(object sender, EventArgs e)
         {
-            int currentCaretPosition = destText.SelectionStart; // Get the current caret position
+            if (autoEncode == true)
+            {
 
-            Encoding selectedEncoding = Encoding.GetEncoding(destEncoding.SelectedItem.ToString()); // Get the selected encoding
-            byte[] encodedBytes = selectedEncoding.GetBytes(destText.Text); // Encode the text with the selected encoding
-            string decodedText = selectedEncoding.GetString(encodedBytes); // Decode the text back to the original form
+                int currentCaretPosition = destText.SelectionStart; // Get the current caret position
 
-            destText.Text = decodedText; // Set the destination text box content to the decoded text
-            destText.SelectionStart = currentCaretPosition; // Restore the caret position
-            destText.ScrollToCaret(); // Scroll to the caret position
+                Encoding selectedEncoding = Encoding.GetEncoding(destEncoding.SelectedItem.ToString()); // Get the selected encoding
+                byte[] encodedBytes = selectedEncoding.GetBytes(destText.Text); // Encode the text with the selected encoding
+                string decodedText = selectedEncoding.GetString(encodedBytes); // Decode the text back to the original form
+
+                destText.Text = decodedText; // Set the destination text box content to the decoded text
+                destText.SelectionStart = currentCaretPosition; // Restore the caret position
+                destText.ScrollToCaret(); // Scroll to the caret position
+            }
+            
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoEncodeBox.Checked == true)
+            {
+                autoEncode = true;
+
+            }
+            else
+            {
+                autoEncode = false;
+            }
+        }
+
+        private void autoSaveBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoSaveBox.Checked == true)
+            {
+                autoSave = true;
+
+            }
+            else
+            {
+                autoSave = false;
+            }
+        }
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            if (autoSaveFileBox.Checked == true)
+            {
+                if (saveFilePath == null && isFileLoaded == true)
+                {
+                    saveFileBtn.PerformClick();
+                    autoSaveFile = true;
+
+                }
+                else
+                {
+                    autoSaveFile = true;
+
+                }
+
+            }
+            else
+            {
+                autoSaveFile = false;
+            }
+        }
+
+        private void main_KeyDown(object sender, KeyEventArgs e)
+        {
+           
+        }
+
+        private void closeFileBtn_Click(object sender, EventArgs e)
+        {
+            if (saveFilePath == null)
+            {
+
+            }
+            else
+            {
+                rightListBoxData.Clear();
+                destList.Items.Clear();
+                destText.Text = null;
+                saveFilePath = null;
+            }
+        }
+
+        private void openSavedFileBtn_Click(object sender, EventArgs e)
+        {
+            if (isFileLoaded == true)
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog
+                {
+                    Filter = "XML Files|*.xml", // Filter to show only XML files
+                    Title = "Select XML File" // Dialog title
+                };
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK) // If the user selects a file
+                {
+                    rightListBoxData.Clear();
+                    fileOperations.CurrentFilePath = openFileDialog.FileName; // Store the selected file path
+                    saveFilePath = openFileDialog.FileName;
+                    // Detect the encoding of the XML file
+                    string encodingName = fileOperations.GetXmlEncoding(fileOperations.CurrentFilePath);
+                    destEncoding.SelectedItem = encodingName.ToLower(); // Set the destination encoding dropdown
+
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // Register additional encodings
+
+                    Encoding selectedEncoding = Encoding.GetEncoding(encodingName.ToLower());
+
+                    destValueControl();
+                    // Clear UI elements
+                    destList.Items.Clear();
+                    destText.Text = null;
+                    destItemCountText.Text = "0 / 0";
+
+                    // Load the XML file into the list boxes
+                    fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, selectedEncoding, destList, destItemCountText,rightListBoxData);
+                    destValueControl();
+                    sourceList.SelectedIndex = 0; // Select the first item in the source list
+
+                }
+            }
+            else
+            {
+                MessageBox.Show("Open XML File First!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void sourceList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.S)
+            {
+                saveFileBtn.PerformClick();
+            }
+            else if (e.KeyCode == Keys.Right)
+            {
+                addToDestBtn.PerformClick();
+                sourceList.SelectedIndex = sourceList.SelectedIndex - 1;
+            }
+            else if (e.KeyCode == Keys.Left)
+            {
+                removeFromDestBtn.PerformClick();
+            }
+        }
+
+        private void destList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.S)
+            {
+                saveFileBtn.PerformClick();
+            }
+            else if (e.KeyCode == Keys.Left)
+            {
+                removeFromDestBtn.PerformClick();
+                destList.SelectedIndex = destList.SelectedIndex - 1;
+
+            }
         }
     }
     }

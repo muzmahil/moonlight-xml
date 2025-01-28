@@ -42,6 +42,11 @@
             this.destEncoding = new System.Windows.Forms.ComboBox();
             this.sourceItemCountText = new System.Windows.Forms.Label();
             this.destItemCountText = new System.Windows.Forms.Label();
+            this.autoEncodeBox = new System.Windows.Forms.CheckBox();
+            this.autoSaveBox = new System.Windows.Forms.CheckBox();
+            this.autoSaveFileBox = new System.Windows.Forms.CheckBox();
+            this.closeFileBtn = new System.Windows.Forms.Button();
+            this.openSavedFileBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // openFileBtn
@@ -73,6 +78,7 @@
             this.sourceList.Size = new System.Drawing.Size(553, 218);
             this.sourceList.TabIndex = 1;
             this.sourceList.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            this.sourceList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.sourceList_KeyDown);
             // 
             // sourceText
             // 
@@ -94,10 +100,11 @@
             this.sourceEncoding.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.sourceEncoding.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sourceEncoding.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.sourceEncoding.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.sourceEncoding.FormattingEnabled = true;
             this.sourceEncoding.Location = new System.Drawing.Point(12, 68);
             this.sourceEncoding.Name = "sourceEncoding";
-            this.sourceEncoding.Size = new System.Drawing.Size(170, 21);
+            this.sourceEncoding.Size = new System.Drawing.Size(170, 24);
             this.sourceEncoding.TabIndex = 3;
             this.sourceEncoding.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
@@ -108,9 +115,9 @@
             this.addToDestBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.addToDestBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.addToDestBtn.ForeColor = System.Drawing.Color.White;
-            this.addToDestBtn.Location = new System.Drawing.Point(595, 363);
+            this.addToDestBtn.Location = new System.Drawing.Point(571, 402);
             this.addToDestBtn.Name = "addToDestBtn";
-            this.addToDestBtn.Size = new System.Drawing.Size(42, 81);
+            this.addToDestBtn.Size = new System.Drawing.Size(85, 78);
             this.addToDestBtn.TabIndex = 4;
             this.addToDestBtn.Text = ">";
             this.addToDestBtn.UseVisualStyleBackColor = false;
@@ -130,6 +137,7 @@
             this.destList.Size = new System.Drawing.Size(553, 218);
             this.destList.TabIndex = 5;
             this.destList.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
+            this.destList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.destList_KeyDown);
             // 
             // destText
             // 
@@ -151,7 +159,7 @@
             this.destSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.destSave.BackColor = System.Drawing.Color.DarkGray;
             this.destSave.Enabled = false;
-            this.destSave.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.destSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.destSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.destSave.ForeColor = System.Drawing.Color.White;
             this.destSave.Location = new System.Drawing.Point(662, 740);
@@ -166,7 +174,7 @@
             // 
             this.saveFileBtn.BackColor = System.Drawing.Color.DarkGray;
             this.saveFileBtn.Enabled = false;
-            this.saveFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.saveFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.saveFileBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.saveFileBtn.ForeColor = System.Drawing.Color.White;
             this.saveFileBtn.Location = new System.Drawing.Point(130, 12);
@@ -182,12 +190,12 @@
             this.removeFromDestBtn.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.removeFromDestBtn.BackColor = System.Drawing.Color.DarkGray;
             this.removeFromDestBtn.Enabled = false;
-            this.removeFromDestBtn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.removeFromDestBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.removeFromDestBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.removeFromDestBtn.ForeColor = System.Drawing.Color.White;
-            this.removeFromDestBtn.Location = new System.Drawing.Point(595, 516);
+            this.removeFromDestBtn.Location = new System.Drawing.Point(571, 486);
             this.removeFromDestBtn.Name = "removeFromDestBtn";
-            this.removeFromDestBtn.Size = new System.Drawing.Size(42, 78);
+            this.removeFromDestBtn.Size = new System.Drawing.Size(85, 78);
             this.removeFromDestBtn.TabIndex = 9;
             this.removeFromDestBtn.Text = "<";
             this.removeFromDestBtn.UseVisualStyleBackColor = false;
@@ -198,21 +206,22 @@
             this.destEncoding.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.destEncoding.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.destEncoding.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.destEncoding.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.destEncoding.FormattingEnabled = true;
             this.destEncoding.Location = new System.Drawing.Point(662, 68);
             this.destEncoding.Name = "destEncoding";
-            this.destEncoding.Size = new System.Drawing.Size(170, 21);
+            this.destEncoding.Size = new System.Drawing.Size(170, 24);
             this.destEncoding.TabIndex = 10;
             this.destEncoding.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
             // sourceItemCountText
             // 
             this.sourceItemCountText.AutoSize = true;
-            this.sourceItemCountText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.sourceItemCountText.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.sourceItemCountText.ForeColor = System.Drawing.Color.White;
-            this.sourceItemCountText.Location = new System.Drawing.Point(8, 476);
+            this.sourceItemCountText.Location = new System.Drawing.Point(7, 465);
             this.sourceItemCountText.Name = "sourceItemCountText";
-            this.sourceItemCountText.Size = new System.Drawing.Size(39, 20);
+            this.sourceItemCountText.Size = new System.Drawing.Size(58, 29);
             this.sourceItemCountText.TabIndex = 11;
             this.sourceItemCountText.Text = "0 / 0";
             // 
@@ -221,13 +230,83 @@
             this.destItemCountText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.destItemCountText.AutoSize = true;
-            this.destItemCountText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.destItemCountText.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.destItemCountText.ForeColor = System.Drawing.Color.White;
-            this.destItemCountText.Location = new System.Drawing.Point(658, 476);
+            this.destItemCountText.Location = new System.Drawing.Point(657, 465);
             this.destItemCountText.Name = "destItemCountText";
-            this.destItemCountText.Size = new System.Drawing.Size(39, 20);
+            this.destItemCountText.Size = new System.Drawing.Size(58, 29);
             this.destItemCountText.TabIndex = 12;
             this.destItemCountText.Text = "0 / 0";
+            // 
+            // autoEncodeBox
+            // 
+            this.autoEncodeBox.AutoSize = true;
+            this.autoEncodeBox.Checked = true;
+            this.autoEncodeBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autoEncodeBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.autoEncodeBox.ForeColor = System.Drawing.Color.White;
+            this.autoEncodeBox.Location = new System.Drawing.Point(838, 70);
+            this.autoEncodeBox.Name = "autoEncodeBox";
+            this.autoEncodeBox.Size = new System.Drawing.Size(103, 20);
+            this.autoEncodeBox.TabIndex = 13;
+            this.autoEncodeBox.Text = "Auto Encode";
+            this.autoEncodeBox.UseVisualStyleBackColor = true;
+            this.autoEncodeBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // autoSaveBox
+            // 
+            this.autoSaveBox.AutoSize = true;
+            this.autoSaveBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.autoSaveBox.ForeColor = System.Drawing.Color.White;
+            this.autoSaveBox.Location = new System.Drawing.Point(947, 68);
+            this.autoSaveBox.Name = "autoSaveBox";
+            this.autoSaveBox.Size = new System.Drawing.Size(88, 20);
+            this.autoSaveBox.TabIndex = 14;
+            this.autoSaveBox.Text = "Auto Save";
+            this.autoSaveBox.UseVisualStyleBackColor = true;
+            this.autoSaveBox.CheckedChanged += new System.EventHandler(this.autoSaveBox_CheckedChanged);
+            // 
+            // autoSaveFileBox
+            // 
+            this.autoSaveFileBox.AutoSize = true;
+            this.autoSaveFileBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.autoSaveFileBox.ForeColor = System.Drawing.Color.White;
+            this.autoSaveFileBox.Location = new System.Drawing.Point(251, 20);
+            this.autoSaveFileBox.Name = "autoSaveFileBox";
+            this.autoSaveFileBox.Size = new System.Drawing.Size(113, 20);
+            this.autoSaveFileBox.TabIndex = 15;
+            this.autoSaveFileBox.Text = "Auto Save File";
+            this.autoSaveFileBox.UseVisualStyleBackColor = true;
+            this.autoSaveFileBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_1);
+            // 
+            // closeFileBtn
+            // 
+            this.closeFileBtn.BackColor = System.Drawing.Color.DarkGray;
+            this.closeFileBtn.Enabled = false;
+            this.closeFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.closeFileBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.closeFileBtn.ForeColor = System.Drawing.Color.White;
+            this.closeFileBtn.Location = new System.Drawing.Point(1106, 68);
+            this.closeFileBtn.Name = "closeFileBtn";
+            this.closeFileBtn.Size = new System.Drawing.Size(109, 25);
+            this.closeFileBtn.TabIndex = 16;
+            this.closeFileBtn.Text = "Close File";
+            this.closeFileBtn.UseVisualStyleBackColor = false;
+            this.closeFileBtn.Click += new System.EventHandler(this.closeFileBtn_Click);
+            // 
+            // openSavedFileBtn
+            // 
+            this.openSavedFileBtn.BackColor = System.Drawing.SystemColors.Highlight;
+            this.openSavedFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.openSavedFileBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.openSavedFileBtn.ForeColor = System.Drawing.Color.White;
+            this.openSavedFileBtn.Location = new System.Drawing.Point(1106, 37);
+            this.openSavedFileBtn.Name = "openSavedFileBtn";
+            this.openSavedFileBtn.Size = new System.Drawing.Size(109, 25);
+            this.openSavedFileBtn.TabIndex = 17;
+            this.openSavedFileBtn.Text = "Open File";
+            this.openSavedFileBtn.UseVisualStyleBackColor = false;
+            this.openSavedFileBtn.Click += new System.EventHandler(this.openSavedFileBtn_Click);
             // 
             // main
             // 
@@ -235,6 +314,11 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.ClientSize = new System.Drawing.Size(1227, 796);
+            this.Controls.Add(this.openSavedFileBtn);
+            this.Controls.Add(this.closeFileBtn);
+            this.Controls.Add(this.autoSaveFileBox);
+            this.Controls.Add(this.autoSaveBox);
+            this.Controls.Add(this.autoEncodeBox);
             this.Controls.Add(this.destItemCountText);
             this.Controls.Add(this.sourceItemCountText);
             this.Controls.Add(this.destEncoding);
@@ -255,6 +339,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "XML Translator";
             this.Load += new System.EventHandler(this.main_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.main_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -275,6 +360,11 @@
         private System.Windows.Forms.ComboBox destEncoding;
         private System.Windows.Forms.Label sourceItemCountText;
         private System.Windows.Forms.Label destItemCountText;
+        private System.Windows.Forms.CheckBox autoEncodeBox;
+        private System.Windows.Forms.CheckBox autoSaveBox;
+        private System.Windows.Forms.CheckBox autoSaveFileBox;
+        private System.Windows.Forms.Button closeFileBtn;
+        private System.Windows.Forms.Button openSavedFileBtn;
     }
 }
 

@@ -16,7 +16,6 @@ namespace XML_Translator
         public string CurrentFilePath { get; set; }
 
         // Stores the XML data (id and text pairs) loaded from the file
-        public Dictionary<string, string> XmlData { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Detects the encoding of the XML file by reading the first line.
@@ -55,7 +54,7 @@ namespace XML_Translator
         /// <param name="encoding">The encoding to use for reading the file.</param>
         /// <param name="sourceList">The ListBox to populate with XML data.</param>
         /// <param name="sourceItemCountText">The Label to update with the item count.</param>
-        public void LoadXmlToListBox(string filePath, Encoding encoding, ListBox sourceList, Label sourceItemCountText)
+        public void LoadXmlToListBox(string filePath, Encoding encoding, ListBox sourceList, Label sourceItemCountText, Dictionary<string,string> XmlData)
         {
             try
             {
