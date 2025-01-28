@@ -20,7 +20,7 @@ namespace XML_Translator
         public bool autoSaveFile = false;
         private bool isFileLoaded = false;
         public string saveFilePath = null;
-        private const string CurrentVersion = "1.0.2"; // Current version of the application
+        private const string CurrentVersion = "1.0.3"; // Current version of the application
 
         public main()
         {
