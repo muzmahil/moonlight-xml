@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -24,27 +25,25 @@ namespace XML_Translator
         /// <returns>The encoding name (e.g., "utf-8").</returns>
         public string GetXmlEncoding(string filePath)
         {
-            try
+            string encoding = null;
+
+            using (StreamReader reader = new StreamReader(filePath))
             {
-                using (StreamReader reader = new StreamReader(filePath))
+                string firstLine = reader.ReadLine(); // İlk satırı oku
+
+                if (!string.IsNullOrEmpty(firstLine) && firstLine.ToLower().Contains("encoding"))
                 {
-                    string firstLine = reader.ReadLine(); // Read the first line of the file
-                    if (firstLine.Contains("encoding")) // Check if the encoding is specified
+                    // Encoding özniteliğini yakalamak için regex
+                    Match match = Regex.Match(firstLine, @"encoding\s*=\s*[""']([^""']+)[""']", RegexOptions.IgnoreCase);
+
+                    if (match.Success)
                     {
-                        int encodingStartIndex = firstLine.IndexOf("encoding") + 10; // Find the start of the encoding value
-                        int encodingEndIndex = firstLine.IndexOf("\"", encodingStartIndex); // Find the end of the encoding value
-                        return firstLine.Substring(encodingStartIndex, encodingEndIndex - encodingStartIndex); // Extract the encoding name
+                        encoding = match.Groups[1].Value; // Encoding değerini al
                     }
                 }
             }
-            catch (Exception)
-            {
-                // If an error occurs, default to UTF-8
-                return "utf-8";
-            }
 
-            // If no encoding is found, default to UTF-8
-            return "utf-8";
+            return encoding;
         }
 
         /// <summary>
@@ -54,12 +53,12 @@ namespace XML_Translator
         /// <param name="encoding">The encoding to use for reading the file.</param>
         /// <param name="sourceList">The ListBox to populate with XML data.</param>
         /// <param name="sourceItemCountText">The Label to update with the item count.</param>
-        public void LoadXmlToListBox(string filePath, Encoding encoding, ListBox sourceList, Label sourceItemCountText, Dictionary<string,string> XmlData)
+        public void LoadXmlToListBox(string filePath, string encoding, ListBox sourceList, Label sourceItemCountText, Dictionary<string,string> XmlData)
         {
             try
             {
                 string xmlContent;
-                using (StreamReader reader = new StreamReader(filePath, encoding))
+                using (StreamReader reader = new StreamReader(filePath))
                 {
                     xmlContent = reader.ReadToEnd(); // Read the entire XML file
                 }

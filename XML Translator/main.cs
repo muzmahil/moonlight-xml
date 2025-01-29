@@ -43,23 +43,12 @@ namespace XML_Translator
                 isFileLoaded = true;
                 // Detect the encoding of the XML file
                 string encodingName = fileOperations.GetXmlEncoding(fileOperations.CurrentFilePath);
+            
                 sourceEncoding.SelectedItem = encodingName.ToLower(); // Set the source encoding dropdown
                 destEncoding.SelectedItem = encodingName.ToLower(); // Set the destination encoding dropdown
 
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // Register additional encodings
 
-                Encoding selectedEncoding = null;
-
-                try
-                {
-                    // Try to get the encoding from the detected encoding name
-                    selectedEncoding = Encoding.GetEncoding(encodingName);
-                }
-                catch (ArgumentException)
-                {
-                    // If the encoding is not supported, default to UTF-8
-                    selectedEncoding = Encoding.UTF8;
-                }
 
                 // Clear UI elements
                 sourceList.Items.Clear();
@@ -70,7 +59,7 @@ namespace XML_Translator
                 destItemCountText.Text = "0 / 0";
 
                 // Load the XML file into the list boxes
-                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, selectedEncoding, sourceList, sourceItemCountText,sourceListBoxData);
+                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), sourceList, sourceItemCountText,sourceListBoxData);
                 sourceList.SelectedIndex = 0; // Select the first item in the source list
             }
         }
@@ -90,7 +79,7 @@ namespace XML_Translator
 
                 destValueControl(); // Update the destination list controls
 
-                string selectedEncodingName = sourceEncoding.SelectedItem?.ToString() ?? "utf-8"; // Get the selected encoding
+                string selectedEncodingName = sourceEncoding.SelectedItem.ToString(); // Get the selected encoding
                 Encoding selectedEncoding = Encoding.GetEncoding(selectedEncodingName); // Get the encoding object
 
                 // Display the text for the selected id
@@ -101,33 +90,36 @@ namespace XML_Translator
         // Method to display the text for a selected id in the source text box
         private void DisplayTextForSelectedId(string id, Encoding encoding)
         {
-            try
-            {
-                string xmlContent;
-                using (StreamReader reader = new StreamReader(fileOperations.CurrentFilePath, encoding))
-                {
-                    xmlContent = reader.ReadToEnd(); // Read the XML file
-                }
+            byte[] encodedBytes = encoding.GetBytes(sourceListBoxData[id]);
+            string encodedString = encoding.GetString(encodedBytes);
+            sourceText.Text = encodedString;
+            /* try
+             {
+                 string xmlContent;
+                 using (StreamReader reader = new StreamReader(fileOperations.CurrentFilePath, encoding))
+                 {
+                     xmlContent = reader.ReadToEnd(); // Read the XML file
+                 }
 
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(xmlContent); // Load the XML content
+                 XmlDocument xmlDoc = new XmlDocument();
+                 xmlDoc.LoadXml(xmlContent); // Load the XML content
 
-                // Find the <text> node for the selected id
-                XmlNode node = xmlDoc.SelectSingleNode($"//string[@id='{id}']/text");
+                 // Find the <text> node for the selected id
+                 XmlNode node = xmlDoc.SelectSingleNode($"//string[@id='{id}']/text");
 
-                if (node != null) // If the node is found
-                {
-                    sourceText.Text = node.InnerText; // Display the text in the source text box
-                }
-                else
-                {
-                    sourceText.Text = "No value found."; // Display a message if no text is found
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show error message
-            }
+                 if (node != null) // If the node is found
+                 {
+                     sourceText.Text = node.InnerText; // Display the text in the source text box
+                 }
+                 else
+                 {
+                     sourceText.Text = "No value found."; // Display a message if no text is found
+                 }
+             }
+             catch (Exception ex)
+             {
+                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show error message
+             }*/
         }
 
         // Event handler for when the form is loaded
@@ -231,10 +223,7 @@ namespace XML_Translator
                 string selectedId = destList.SelectedItem.ToString(); // Get the selected item's ID
                 Encoding selectedEncoding = Encoding.GetEncoding(destEncoding.SelectedItem.ToString()); // Get the selected encoding
                 DisplayTextForSelectedIdInRightTextBox(selectedId, selectedEncoding); // Display the text for the selected ID in the right text box
-                if (autoSave == true)
-                {
-                    destSave.PerformClick();
-                }
+            
                 if (autoSaveFileBox.Checked == true && isFileLoaded == true && destList.Items.Count > 0 && saveFilePath != null)
                 {
                     fileOperations.SaveXmlFile(saveFilePath, selectedEncoding, rightListBoxData); // Save the XML file
@@ -255,7 +244,11 @@ namespace XML_Translator
         // Method to display text for the selected ID in the right text box
         private void DisplayTextForSelectedIdInRightTextBox(string id, Encoding encoding)
         {
-            try
+            string text = rightListBoxData[id];
+            byte[] encodedBytes = encoding.GetBytes(rightListBoxData[id]);
+            string encodedString = encoding.GetString(encodedBytes);
+            destText.Text = encodedString;
+            /*try
             {
                 string xmlContent;
                 using (StreamReader reader = new StreamReader(fileOperations.CurrentFilePath, encoding)) // Read the XML file with the selected encoding
@@ -280,19 +273,21 @@ namespace XML_Translator
             catch (Exception ex)
             {
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show an error message if something goes wrong
-            }
+            }*/
         }
 
         // Event handler for saving the content of the destination text box
         private void button3_Click(object sender, EventArgs e)
         {
+
             if (destList.SelectedItem != null) // If an item is selected in the destination list
             {
                 string selectedItem = destList.SelectedItem.ToString(); // Get the selected item
-
                 if (rightListBoxData.ContainsKey(selectedItem)) // If the selected item exists in the data dictionary
                 {
                     rightListBoxData[selectedItem] = destText.Text; // Update the content in the data dictionary
+                    
+
                 }
             }
             else
@@ -362,12 +357,10 @@ namespace XML_Translator
         {
             if (destList.SelectedItem != null) // If an item is selected in the destination list
             {
-                string selectedId = destList.SelectedItem.ToString(); // Get the selected ID
-
                 int currentCaretPosition = destText.SelectionStart; // Get the current caret position
 
                 Encoding selectedEncoding = Encoding.GetEncoding(destEncoding.SelectedItem.ToString()); // Get the selected encoding
-                byte[] encodedBytes = selectedEncoding.GetBytes(destText.Text); // Encode the text with the selected encoding
+                byte[] encodedBytes = selectedEncoding.GetBytes(rightListBoxData[destList.SelectedItem.ToString()]); // Encode the text with the selected encoding
                 string decodedText = selectedEncoding.GetString(encodedBytes); // Decode the text back to the original form
 
                 destText.Text = decodedText; // Set the destination text box content to the decoded text
@@ -410,15 +403,16 @@ namespace XML_Translator
 
         private void autoSaveBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (autoSaveBox.Checked == true)
-            {
-                autoSave = true;
-
-            }
-            else
+            if (autoSaveBox.Checked == false)
             {
                 autoSave = false;
             }
+            else
+            {
+                autoSave = true;
+                destSave.PerformClick();
+            }
+
         }
 
         private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
@@ -494,7 +488,7 @@ namespace XML_Translator
                     destItemCountText.Text = "0 / 0";
 
                     // Load the XML file into the list boxes
-                    fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, selectedEncoding, destList, destItemCountText,rightListBoxData);
+                    fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), destList, destItemCountText,rightListBoxData);
                     destValueControl();
                     sourceList.SelectedIndex = 0; // Select the first item in the source list
 
@@ -532,7 +526,16 @@ namespace XML_Translator
             else if (e.KeyCode == Keys.Left)
             {
                 removeFromDestBtn.PerformClick();
-                destList.SelectedIndex = destList.SelectedIndex - 1;
+               
+
+            }
+        }
+
+        private void destText_Leave(object sender, EventArgs e)
+        {
+            if (autoSave == true)
+            {
+                destSave.PerformClick();
 
             }
         }

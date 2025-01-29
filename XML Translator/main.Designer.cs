@@ -101,6 +101,7 @@
             this.sourceEncoding.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sourceEncoding.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.sourceEncoding.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.sourceEncoding.ForeColor = System.Drawing.Color.White;
             this.sourceEncoding.FormattingEnabled = true;
             this.sourceEncoding.Location = new System.Drawing.Point(12, 68);
             this.sourceEncoding.Name = "sourceEncoding";
@@ -115,9 +116,9 @@
             this.addToDestBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.addToDestBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.addToDestBtn.ForeColor = System.Drawing.Color.White;
-            this.addToDestBtn.Location = new System.Drawing.Point(571, 402);
+            this.addToDestBtn.Location = new System.Drawing.Point(584, 415);
             this.addToDestBtn.Name = "addToDestBtn";
-            this.addToDestBtn.Size = new System.Drawing.Size(85, 78);
+            this.addToDestBtn.Size = new System.Drawing.Size(60, 60);
             this.addToDestBtn.TabIndex = 4;
             this.addToDestBtn.Text = ">";
             this.addToDestBtn.UseVisualStyleBackColor = false;
@@ -153,6 +154,7 @@
             this.destText.TabIndex = 6;
             this.destText.Text = "";
             this.destText.TextChanged += new System.EventHandler(this.destText_TextChanged);
+            this.destText.Leave += new System.EventHandler(this.destText_Leave);
             // 
             // destSave
             // 
@@ -166,7 +168,7 @@
             this.destSave.Name = "destSave";
             this.destSave.Size = new System.Drawing.Size(553, 35);
             this.destSave.TabIndex = 7;
-            this.destSave.Text = "Save";
+            this.destSave.Text = "Save Value";
             this.destSave.UseVisualStyleBackColor = false;
             this.destSave.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -193,9 +195,9 @@
             this.removeFromDestBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.removeFromDestBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.removeFromDestBtn.ForeColor = System.Drawing.Color.White;
-            this.removeFromDestBtn.Location = new System.Drawing.Point(571, 486);
+            this.removeFromDestBtn.Location = new System.Drawing.Point(584, 485);
             this.removeFromDestBtn.Name = "removeFromDestBtn";
-            this.removeFromDestBtn.Size = new System.Drawing.Size(85, 78);
+            this.removeFromDestBtn.Size = new System.Drawing.Size(60, 60);
             this.removeFromDestBtn.TabIndex = 9;
             this.removeFromDestBtn.Text = "<";
             this.removeFromDestBtn.UseVisualStyleBackColor = false;
@@ -241,8 +243,6 @@
             // autoEncodeBox
             // 
             this.autoEncodeBox.AutoSize = true;
-            this.autoEncodeBox.Checked = true;
-            this.autoEncodeBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.autoEncodeBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.autoEncodeBox.ForeColor = System.Drawing.Color.White;
             this.autoEncodeBox.Location = new System.Drawing.Point(838, 70);
@@ -258,11 +258,11 @@
             this.autoSaveBox.AutoSize = true;
             this.autoSaveBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.autoSaveBox.ForeColor = System.Drawing.Color.White;
-            this.autoSaveBox.Location = new System.Drawing.Point(947, 68);
+            this.autoSaveBox.Location = new System.Drawing.Point(947, 70);
             this.autoSaveBox.Name = "autoSaveBox";
-            this.autoSaveBox.Size = new System.Drawing.Size(88, 20);
+            this.autoSaveBox.Size = new System.Drawing.Size(126, 20);
             this.autoSaveBox.TabIndex = 14;
-            this.autoSaveBox.Text = "Auto Save";
+            this.autoSaveBox.Text = "Auto Save Value";
             this.autoSaveBox.UseVisualStyleBackColor = true;
             this.autoSaveBox.CheckedChanged += new System.EventHandler(this.autoSaveBox_CheckedChanged);
             // 
