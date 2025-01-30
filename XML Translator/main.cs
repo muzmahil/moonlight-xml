@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
@@ -20,7 +21,8 @@ namespace XML_Translator
         public bool autoSaveFile = false;
         private bool isFileLoaded = false;
         public string saveFilePath = null;
-        private const string CurrentVersion = "1.0.3"; // Current version of the application
+        private const string CurrentVersion = "1.0.5"; // Current version of the application
+        private string fileName = null;
 
         public main()
         {
@@ -61,6 +63,7 @@ namespace XML_Translator
                 // Load the XML file into the list boxes
                 fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), sourceList, sourceItemCountText,sourceListBoxData);
                 sourceList.SelectedIndex = 0; // Select the first item in the source list
+                fileName = openFileDialog.SafeFileName;
             }
         }
 
@@ -184,6 +187,17 @@ namespace XML_Translator
             if (!((sourceList.SelectedIndex + 1) + 1 > sourceList.Items.Count))
             {
                 sourceList.SelectedIndex++;
+               
+
+            }
+            if (!((destList.SelectedIndex + 1) + 1 > destList.Items.Count))
+            {
+                destList.SelectedIndex++;
+                if (sourceList.SelectedItem.ToString() == destList.SelectedItem.ToString() && sourceList.Items.Count > destList.Items.Count)
+                {
+                    sourceList.SelectedIndex++;
+
+                }
             }
         }
 
@@ -312,7 +326,9 @@ namespace XML_Translator
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
                     Filter = "XML Files|*.xml", // Set the filter for XML files
-                    Title = "Save XML File" // Set the title of the save file dialog
+                    Title = "Save XML File", // Set the title of the save file dialog
+                    FileName = fileName
+                    
                 };
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK) // If the user selects a file to save
@@ -336,14 +352,18 @@ namespace XML_Translator
             if (destList.SelectedItem != null) // If an item is selected in the destination list
             {
                 string selectedItem = destList.SelectedItem.ToString(); // Get the selected item
-
+                int lastitem = destList.SelectedIndex;
                 destList.Items.Remove(selectedItem); // Remove the selected item from the list
+                if (lastitem -1 >= 0)
+                {
+                    destList.SelectedIndex = (lastitem - 1);
+                }
                 destItemCountText.Text = (destList.SelectedIndex + 1).ToString() + " / " + destList.Items.Count.ToString(); // Update the item count display
                 destValueControl(); // Update the controls based on the new list state
 
                 if (rightListBoxData.ContainsKey(selectedItem)) // If the selected item exists in the data dictionary
-                {
-                    rightListBoxData.Remove(selectedItem); // Remove the selected item from the data dictionary
+                {        
+                        rightListBoxData.Remove(selectedItem); // Remove the selected item from the data dictionary                    
                 }
             }
             else

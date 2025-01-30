@@ -53,46 +53,63 @@ namespace XML_Translator
         /// <param name="encoding">The encoding to use for reading the file.</param>
         /// <param name="sourceList">The ListBox to populate with XML data.</param>
         /// <param name="sourceItemCountText">The Label to update with the item count.</param>
-        public void LoadXmlToListBox(string filePath, string encoding, ListBox sourceList, Label sourceItemCountText, Dictionary<string,string> XmlData)
+        public void LoadXmlToListBox(string filePath, string encoding, ListBox sourceList, Label sourceItemCountText, Dictionary<string, string> XmlData)
         {
             try
             {
                 string xmlContent;
-                using (StreamReader reader = new StreamReader(filePath))
+                Encoding enc = Encoding.GetEncoding(encoding); // Belirtilen encoding ile aç
+
+                using (StreamReader reader = new StreamReader(filePath, enc))
                 {
-                    xmlContent = reader.ReadToEnd(); // Read the entire XML file
+                    xmlContent = reader.ReadToEnd(); // XML dosyasını oku
                 }
 
+                // Hatalı karakterleri temizle
+                xmlContent = FixXmlEntities(xmlContent);
+
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(xmlContent); // Load the XML content into an XmlDocument
+                xmlDoc.LoadXml(xmlContent); // XML içeriğini yükle
+                XmlNodeList stringNodes = xmlDoc.SelectNodes("//string"); // <string> düğümlerini seç
 
-                XmlNodeList stringNodes = xmlDoc.SelectNodes("//string"); // Select all <string> nodes
+                sourceList.Items.Clear();
+                XmlData.Clear();
 
-                sourceList.Items.Clear(); // Clear the source ListBox
-                XmlData.Clear(); // Clear the XML data dictionary
-
-                // Iterate through each <string> node
                 foreach (XmlNode node in stringNodes)
                 {
-                    string id = node.Attributes["id"]?.Value; // Get the "id" attribute
-                    string text = node["text"]?.InnerText ?? string.Empty; // Get the "text" element's inner text
+                    string id = node.Attributes["id"]?.Value; // "id" al
+                    string text = node["text"]?.InnerText ?? string.Empty; // "text" içeriğini al
 
-                    if (!string.IsNullOrEmpty(id)) // If the id is not empty
+                    if (!string.IsNullOrEmpty(id))
                     {
-                        XmlData[id] = text; // Add the id and text to the dictionary
-                        sourceList.Items.Add(id); // Add the id to the source ListBox
+                        XmlData[id] = text; // Dictionary'ye ekle
+                        sourceList.Items.Add(id); // ListBox'a ekle
                     }
                 }
 
-                // Update the source item count text
                 sourceItemCountText.Text = $"0 / {sourceList.Items.Count}";
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}"); // Throw an exception if an error occurs
+                MessageBox.Show($"XML Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // XML içindeki hatalı karakterleri düzelten fonksiyon
+        private string FixXmlEntities(string xml)
+        {
+            return Regex.Replace(xml, @"(?<=<text>)(.*?)(?=</text>)", match =>
+            {
+                return match.Value
+                    .Replace("&", "&amp;")
+                    .Replace("'", "&apos;")
+                    .Replace("\"", "&quot;")
+                    .Replace("<", "&lt;")
+                    .Replace(">", "&gt;")
+                    .Replace("\n", "&#10;")
+                    .Replace("\r", "");
+            }, RegexOptions.Singleline);
+        }
         /// <summary>
         /// Saves modified XML data to a file.
         /// </summary>
@@ -103,35 +120,60 @@ namespace XML_Translator
         {
             try
             {
-                XmlDocument xmlDoc = new XmlDocument();
-
-                // Create the XML declaration
-                XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", encoding.WebName, null);
-                xmlDoc.AppendChild(xmlDeclaration);
-
-                // Create the root element
-                XmlElement stringTableElement = xmlDoc.CreateElement("string_table");
-                xmlDoc.AppendChild(stringTableElement);
-
-                // Iterate through the modified data and create XML elements
-                foreach (var item in rightListBoxData)
+                XmlWriterSettings settings = new XmlWriterSettings
                 {
-                    XmlElement stringElement = xmlDoc.CreateElement("string");
-                    stringElement.SetAttribute("id", item.Key); // Set the "id" attribute
+                    Indent = true, // Gerekirse girinti
+                    NewLineOnAttributes = true, // Satır başında özellikleri düzenle
+                    Encoding = encoding, // Dosya kodlaması
+                    ConformanceLevel = ConformanceLevel.Document // Doküman seviyesi uyum
+                };
 
-                    XmlElement textElement = xmlDoc.CreateElement("text");
-                    textElement.InnerText = item.Value; // Set the "text" element's inner text
+                using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("string_table");
 
-                    stringElement.AppendChild(textElement); // Append the text element to the string element
-                    stringTableElement.AppendChild(stringElement); // Append the string element to the root element
+                    foreach (var item in rightListBoxData)
+                    {
+                        writer.WriteStartElement("string");
+                        writer.WriteAttributeString("id", item.Key);
+
+                        // 'InnerText' yerine doğrudan 'text' elementini yazıyoruz
+                        writer.WriteStartElement("text");
+
+                        // Metni düz yaz (escape etmiyoruz)
+                        writer.WriteRaw(FixSaveXmlEntities(item.Value));
+
+                        writer.WriteEndElement(); // </text>
+                        writer.WriteEndElement(); // </string>
+                    }
+
+                    writer.WriteEndElement(); // </string_table>
+                    writer.WriteEndDocument();
                 }
-
-                xmlDoc.Save(filePath); // Save the XML document to the specified file
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}"); // Throw an exception if an error occurs
+                throw new Exception($"Error: {ex.Message}");
             }
         }
+
+        private string FixSaveXmlEntities(string xml)
+        {
+            return Regex.Replace(xml, @"(?<=<text>)(.*?)(?=</text>)", match =>
+            {
+                return match.Value
+                .Replace("&amp;", "&")  // &amp; ifadesini & ile değiştir
+        .Replace("'", "&apos;")  // ' karakterini &apos; ile değiştir
+        .Replace("\"", "&quot;") // " karakterini &quot; ile değiştir
+        .Replace("<", "&lt;")    // < karakterini &lt; ile değiştir
+        .Replace(">", "&gt;")    // > karakterini &gt; ile değiştir
+        .Replace("\n", "&#10;")  // Satır sonu karakterini &#10; ile değiştir
+        .Replace("\r", "&#13;"); // Carriage return karakterini &#13; ile değiştir
+            }, RegexOptions.Singleline);
+        }
+
+
+
     }
 }
