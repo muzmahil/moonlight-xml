@@ -45,7 +45,7 @@ namespace XML_Translator
                 isFileLoaded = true;
                 // Detect the encoding of the XML file
                 string encodingName = fileOperations.GetXmlEncoding(fileOperations.CurrentFilePath);
-            
+
                 sourceEncoding.SelectedItem = encodingName.ToLower(); // Set the source encoding dropdown
                 destEncoding.SelectedItem = encodingName.ToLower(); // Set the destination encoding dropdown
 
@@ -61,8 +61,13 @@ namespace XML_Translator
                 destItemCountText.Text = "0 / 0";
 
                 // Load the XML file into the list boxes
-                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), sourceList, sourceItemCountText,sourceListBoxData);
-                sourceList.SelectedIndex = 0; // Select the first item in the source list
+
+                fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), sourceList, sourceItemCountText, sourceListBoxData);
+                if (rightListBoxData.Count > 0)
+                {
+                    sourceList.SelectedIndex = 0; // Select the first item in the source list
+                }
+
                 fileName = openFileDialog.SafeFileName;
             }
         }
