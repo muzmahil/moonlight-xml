@@ -84,10 +84,11 @@ namespace XML_Translator
                     {
                         XmlData[id] = text; // Dictionary'ye ekle
                         sourceList.Items.Add(id); // ListBox'a ekle
+                        sourceItemCountText.Text = $"0 / {sourceList.Items.Count}";
+
                     }
                 }
 
-                sourceItemCountText.Text = $"0 / {sourceList.Items.Count}";
             }
             catch (Exception ex)
             {

@@ -21,7 +21,7 @@ namespace XML_Translator
         public bool autoSaveFile = false;
         private bool isFileLoaded = false;
         public string saveFilePath = null;
-        private const string CurrentVersion = "1.0.5"; // Current version of the application
+        private const string CurrentVersion = "1.0.6"; // Current version of the application
         private string fileName = null;
 
         public main()
@@ -63,7 +63,7 @@ namespace XML_Translator
                 // Load the XML file into the list boxes
 
                 fileOperations.LoadXmlToListBox(fileOperations.CurrentFilePath, encodingName.ToLower(), sourceList, sourceItemCountText, sourceListBoxData);
-                if (rightListBoxData.Count > 0)
+                if (sourceListBoxData.Count > 0)
                 {
                     sourceList.SelectedIndex = 0; // Select the first item in the source list
                 }
